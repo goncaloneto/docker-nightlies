@@ -62,31 +62,9 @@ docker tag pentaho$VERSION localhost:5000/pentaho$VERSION:latest
 echo "INFO: Pushing Latest to registry..."
 docker push localhost:5000/pentaho$VERSION:latest
 
-#Tag the new version with the build number as tag to keep
-#echo "INFO: Tagging Latest build with build number"
-#docker tag pentaho80rc 172.20.50.20:5050/pentaho80rc:$latest
-
-#Push the new version with the build number as tag to keep
-#echo "INFO: Pushing Latest build with build number"
-#docker push 172.20.50.20:5050/pentaho80rc:$latest
-
-#Tag the new version with the build number for CBF use
-#echo "INFO: Tagging Latest build with build number"
-#docker tag pentaho80rc 172.20.50.20:5050/baserver-ee-7.1-qat:$latest
-
-#Push the new version with the build number for CBF use
-#echo "INFO: Pushing Latest build with build number"
-#docker push 172.20.50.20:5050/baserver-ee-7.1-qat:$latest
-
 #Remove local images
 echo "INFO: Deleting local registry latest image..."
 docker rmi localhost:5000/pentaho$VERSION:latest
-
-#echo "INFO: Deleting local registry latest with build number image..."
-#docker rmi 172.20.50.20:5050/pentaho80rc:$latest
-
-#echo "INFO: Deleting Latest build with build number for CBF use"
-#docker rmi 172.20.50.20:5050/baserver-ee-7.1-qat:$latest
 
 docker exec registry /bin/registry garbage-collect /etc/docker/registry/config.yml
 
