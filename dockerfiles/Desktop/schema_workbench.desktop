@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Pentaho Schema Workbench
+Type=Application
+Exec=/pentaho/design-tools/schema-workbench/workbench.sh
+Icon=/pentaho/design-tools/schema-workbench/pentaho_schema_workbench.ico
+Terminal=true

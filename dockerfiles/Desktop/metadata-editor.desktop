@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Pentaho Metadata Editor
+Type=Application
+Exec=/pentaho/design-tools/metadata-editor/metadata-editor.sh
+Icon=/pentaho/design-tools/data-integration/pentaho_metadata_editor.ico
+Terminal=true

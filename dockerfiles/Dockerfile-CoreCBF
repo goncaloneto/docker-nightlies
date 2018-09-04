@@ -1,0 +1,74 @@
+FROM    ubuntu:14.04
+MAINTAINER  Pedro Alves <palves@pentaho.com>
+
+# Set the locale
+
+RUN locale-gen en_US.UTF-8  
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8 
+ENV TERM xterm
+RUN update-locale LANG=en_US.UTF-8 LC_MESSAGES=POSIX 
+RUN echo Building core image
+ENV DEBIAN_FRONTEND noninteractive
+ENV DISPLAY :1
+ENV NO_VNC_HOME /root/noVNC
+ENV VNC_COL_DEPTH 24
+ENV VNC_RESOLUTION 1920x1080
+ENV VNC_PW pentaho
+
+ENV SAKULI_DOWNLOAD_URL https://labs.consol.de/sakuli/install
+
+
+# For jdk7, install oracle-java7-installer
+# For jdk8, install oracle-java8-installer
+
+RUN sed 's/main$/main universe/' -i /etc/apt/sources.list
+RUN apt-get update && apt-get install -y software-properties-common gedit libwebkitgtk-1.0-0 unzip git lftp postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3 
+RUN add-apt-repository ppa:webupd8team/java -y
+RUN apt-get update 
+#RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections 
+#RUN apt-get install -y oracle-java7-installer 
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections 
+RUN apt-get install -y oracle-java8-installer 
+RUN apt-get clean 
+RUN rm -rf /var/lib/apt/lists/* 
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers 
+RUN rm -rf /tmp/*
+
+############### add linux-mint dependicies and update packages
+RUN apt-key adv --recv-key --keyserver keyserver.ubuntu.com "3EE67F3D0FF405B2"
+RUN echo "deb http://packages.linuxmint.com/ rafaela main upstream import" >> /etc/apt/sources.list.d/mint.list \
+    && echo "deb http://extra.linuxmint.com/ rafaela main " >> /etc/apt/sources.list.d/mint.list
+
+############### xvnc / xfce installation
+RUN apt-get update && apt-get upgrade -y && apt-get install -y supervisor vim xfce4 vnc4server wget && rm -rf /var/lib/apt/
+### Install noVNC - HTML5 based VNC viewer
+RUN mkdir -p $NO_VNC_HOME/utils/websockify \
+    #&& wget -qO- https://github.com/ConSol/noVNC/archive/consol_1.0.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
+    && wget -qO- https://github.com/novnc/noVNC/archive/master.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
+    &&  wget -qO- https://github.com/kanaka/websockify/archive/v0.7.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME/utils/websockify \
+    && chmod +x -v /root/noVNC/utils/*.sh
+
+### Install firefox and chrome browser
+RUN apt-get update \
+    && apt-get install -y firefox chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg \
+    && rm -rf /var/lib/apt/ \
+    && ln -s /usr/bin/chromium-browser /usr/bin/google-chrome \
+    # fix to start chromium in a Docker container, see https://github.com/ConSol/docker-headless-vnc-container/issues/2
+    && echo "CHROMIUM_FLAGS='--no-sandbox --start-maximized --user-data-dir'" > ~/.chromium-browser.init
+
+ADD pg_hba.conf /etc/postgresql/9.3/main/pg_hba.conf
+
+# xvnc server ports, if $DISPLAY=:1 port will be 5901
+EXPOSE 5901
+# novnc web port
+EXPOSE 6901
+
+ADD .vnc /root/.vnc
+ADD .config /root/.config
+ADD Desktop /root/Desktop
+ADD scripts /root/scripts
+RUN chmod +x /root/.vnc/xstartup /etc/X11/xinit/xinitrc /root/scripts/*.sh /root/Desktop/*.desktop
+
+RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf

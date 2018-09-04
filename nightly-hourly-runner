@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+  echo "Error calling $0: Version not specified."
+  printf "\nUsage: $0 versionName versionNumber\n"
+  printf "\nExample: $0 8.1-QAT 8.1.0.0\n"
+  printf "\nWhere 8.1-QAT is the name of the folder at build.pentaho and 8.1.0.0 is the build number as it appear in the file names to donwload (e.g. pdi-ee-client-8.1.0.1-399).\n"
+  exit 1
+fi
+
+while true
+do
+  ./getLatest.sh $1 $2
+  echo "INFO: Cleaning up..."
+  ./cleanup.sh
+  sleep 1h
+done

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Start Pentaho Server
+Type=Application
+Exec=/pentaho/run.sh
+Icon=/pentaho/pentaho-server/tomcat/webapps/pentaho/docs/logo.png
+Terminal=true

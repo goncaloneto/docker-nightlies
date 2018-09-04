@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Pentaho Report Designer
+Type=Application
+Exec=/pentaho/design-tools/report-designer/report-designer.sh
+Icon=/pentaho/design-tools/report-designer/pentaho_report_designer.ico
+Terminal=true

@@ -1,0 +1,48 @@
+FROM cbf2-core
+MAINTAINER  Eduardo Lopes <elopes@pentaho.com>
+
+ADD scripts/getBinaries.sh /scripts/
+ADD scripts/version.txt /scripts/
+ADD scripts/latest.txt /scripts/
+ADD 7x/run.sh /pentaho/
+ADD licenses /pentaho/licenses/
+
+RUN chmod +x /scripts/getBinaries.sh /pentaho/run.sh
+
+RUN  VERSION=$(head -n 1 /scripts/version.txt) && \
+  VERSIONID=$(tail -n 1 /scripts/version.txt) && \
+  echo "[INFO] VERSION=$VERSION" && \
+  echo "[INFO] VERSIONID=$VERSIONID" && \
+  /scripts/getBinaries.sh $VERSION $VERSIONID && \
+  cd /pentaho && \
+  license-installer/install_license.sh install -q  /pentaho/licenses/*lic && \ 
+  mv /root/.pentaho/.installedLicenses.xml /pentaho/pentaho-server && \ 
+  cd /pentaho/design-tools && \
+  license-installer/install_license.sh install -q /pentaho/licenses/*lic && \
+  /etc/init.d/postgresql start && \
+  cd /pentaho/pentaho-server/data/postgresql; \
+  psql -U postgres -f create_jcr_postgresql.sql; \
+  psql -U postgres -f create_quartz_postgresql.sql; \
+  psql -U postgres -f create_repository_postgresql.sql; \
+  rm /pentaho/pentaho-server/promptuser.sh; \
+  cd /pentaho/pentaho-server/tomcat/logs/ ; touch catalina.out ; touch pentaho.log ; \
+  cd /pentaho ; \
+  sed -i -e 's/\(exec ".*"\) start/\1 run/' /pentaho/pentaho-server/tomcat/bin/startup.sh; \
+  mkdir /home/pentaho && groupadd -r pentaho && useradd -r -g pentaho -p $(perl -e'print crypt("pentaho", "aa")' ) -G sudo pentaho && \ 
+  chown -R pentaho.pentaho /pentaho && \ 
+  chown -R pentaho.pentaho /home/pentaho && \	
+  /etc/init.d/postgresql stop && \
+  sed -i 's/<!--//g' /pentaho/pentaho-server/pentaho-solutions/system/cda/plugin.xml && \
+  sed -i 's/-->//g' /pentaho/pentaho-server/pentaho-solutions/system/cda/plugin.xml && \
+  sed -i 's/loader="OVERRIDING"//g' /pentaho/pentaho-server/pentaho-solutions/system/cda/plugin.xml && \
+  sed -i 's/<!--//g' /pentaho/pentaho-server/pentaho-solutions/system/pentaho-cdf-dd/plugin.xml && \
+  sed -i 's/-->//g' /pentaho/pentaho-server/pentaho-solutions/system/pentaho-cdf-dd/plugin.xml && \
+  sed -i 's/<!--new/<new/g' /pentaho/pentaho-server/pentaho-solutions/system/pentaho-cdf-dd/settings.xml && \
+  sed -i 's/button-->/button>/g' /pentaho/pentaho-server/pentaho-solutions/system/pentaho-cdf-dd/settings.xml
+
+EXPOSE 8080 8044 9001
+
+# 1. Run 
+
+ENTRYPOINT ["/root/scripts/vnc_startup.sh"]
+CMD ["--tail-log"]
