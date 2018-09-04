@@ -31,6 +31,10 @@ Purpose:
 * Pushes the new one to the registry;
 * Executes docker's garbage-collector.
 
+## Troubleshooting
+
+If an error occurs when **deleting an image from the docker registry** it means the registry config file was changed. Move the `config.yml` file, located at the root of the project to `/etc/docker/registry`. That files has a flag that allows deleting the images from the registry (`delete: enable: true`).
+
 #### _cleanup.sh_
 
 Purpose:
