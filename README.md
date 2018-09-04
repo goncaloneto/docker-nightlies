@@ -49,7 +49,7 @@ Downloads pentaho binary files to be manual installed when the image is pulled.
 
 ## Server Restart
 
-Steps to took when server is restarted:
+Steps to took when server is restarted: 
 * Start the docker registry container:
   * docker ps -a (copy the container ID);
   * docker start {containerID};
@@ -61,7 +61,9 @@ Since the disk space in CloudStack's VM is limited, I added a dedicated volume t
 Steps I took: 
 * Added a new volume (1TB) on cloudstack;
 * Set the volume to be auto mounted in `/mnt/docker`;
-* Edited the docker.service to use the folder `/mnt/docker` to store data.
+* Edited the docker.service to use the folder `/mnt/docker` to store data. (https://linuxconfig.org/how-to-move-docker-s-default-var-lib-docker-to-another-directory-on-ubuntu-debian-linux)
+
+When **restarting the server in CloudStack** ensure the 1TB disk is mounted in the right place, otherwise docker will start creating files in that directory and the main disk will be full. 
 
 ## Licenses 
 
