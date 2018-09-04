@@ -47,6 +47,14 @@ Adds the `getBinaries.sh` file to the image to be run inside the container (that
 
 Downloads pentaho binary files to be manual installed when the image is pulled. 
 
+## Server Restart
+
+Steps to took when server is restarted:
+* Start the docker registry container:
+  * docker ps -a (copy the container ID);
+  * docker start {containerID};
+* run _nightly-hourly-runner_ via VNC.
+
 ## CloudStack Environment
 
 Since the disk space in CloudStack's VM is limited, I added a dedicated volume to be used by docker. 
